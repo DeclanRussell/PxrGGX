@@ -1,0 +1,27 @@
+<args format="1.0">
+    <shaderType>
+        <tag value="bxdf"/>
+    </shaderType>
+    <param name="Color" type="color" default="0.5 0.5 0.5"
+           widget="color">
+        <tags>
+           <tag value="color"/>
+        </tags>
+        <help>
+            Color of our surface.
+        </help>
+    </param>
+    <param name="Roughness" type="float" default="1.">
+        <tags>
+           <tag value="float"/>
+        </tags>
+        <help>
+            Roughness of our GGX BRDF.
+        </help>
+    </param>
+    <rfmdata nodeid="1053521"
+     classification="shader/surface:rendernode/RenderMan/bxdf:swatch/rmanSwatch"/>
+</args>
+
+
+

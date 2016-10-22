@@ -8,6 +8,10 @@
 *.lai
 *.so
 *.dll
+*.lib
+*.exp
+*.ikl
+*.pdb
 *.dylib
 
 # Qt-es
