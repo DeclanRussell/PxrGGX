@@ -35,6 +35,9 @@
 # ------------------------------------------------------------------------------
 */
 #include "RixBxdf.h"
+#ifdef RENDERMAN21
+    #include "RixRNG.h"
+#endif
 #include "RixShadingUtils.h"
 #include <cstring> // memset
 
@@ -74,13 +77,26 @@ public:
 
     virtual RixBXEvaluateDomain GetEvaluateDomain()
     {
+#ifdef RENDERMAN21
+        return k_RixBXReflect;   // Same as v19/20 kRixBXFront
+#else
         return k_RixBXFront;  // two-sided, but opaque
+#endif
     }
     virtual void GetAggregateLobeTraits(RixBXLobeTraits *t)
     {
         *t = m_lobesWanted;
     }
-
+#ifdef RENDERMAN21
+    virtual void GenerateSample(RixBXTransportTrait transportTrait,
+                                RixBXLobeTraits const *lobesWanted,
+                                RixRNG *rng,
+                                RixBXLobeSampled *lobeSampled,
+                                RtVector3   *Ln,
+                                RixBXLobeWeights &W,
+                                RtFloat *FPdf, RtFloat *RPdf,
+                                RtColorRGB* compTrans)
+#else
     virtual void GenerateSample(RixBXTransportTrait transportTrait,
                                 RixBXLobeTraits const *lobesWanted,
                                 RixRNG *rng,
@@ -88,6 +104,7 @@ public:
                                 RtVector3   *Ln,
                                 RixBXLobeWeights &W,
                                 RtFloat *FPdf, RtFloat *RPdf)
+#endif
     {
         RtInt nPts = shadingCtx->numPts;
         RixBXLobeTraits all = GetAllLobeTraits();
@@ -133,12 +150,20 @@ public:
         }
 
     }
-
+#ifdef RENDERMAN21
+    virtual void EvaluateSample(RixBXTransportTrait transportTrait,
+                                RixBXLobeTraits const *lobesWanted,
+                                RixRNG *rng,
+                                RixBXLobeTraits *lobesEvaluated,
+                                RtVector3 const *Ln, RixBXLobeWeights &W,
+                                RtFloat *FPdf, RtFloat *RPdf)
+#else
     virtual void EvaluateSample(RixBXTransportTrait transportTrait,
                                 RixBXLobeTraits const *lobesWanted,
                                 RixBXLobeTraits *lobesEvaluated,
                                 RtVector3 const *Ln, RixBXLobeWeights &W,
                                 RtFloat *FPdf, RtFloat *RPdf)
+#endif
     {
         RtNormal3 Nf;
         RtInt nPts = shadingCtx->numPts;
@@ -181,7 +206,16 @@ public:
 
 
     }
-
+#ifdef RENDERMAN21
+    virtual void EvaluateSamplesAtIndex(RixBXTransportTrait transportTrait,
+                                            RixBXLobeTraits const &lobesWanted,
+                                            RixRNG *rng,
+                                            RtInt index, RtInt nsamps,
+                                            RixBXLobeTraits *lobesEvaluated,
+                                            RtVector3 const *Ln,
+                                            RixBXLobeWeights &W,
+                                            RtFloat *FPdf, RtFloat *RPdf)
+#else
     virtual void EvaluateSamplesAtIndex(RixBXTransportTrait transportTrait,
                                         RixBXLobeTraits const &lobesWanted,
                                         RtInt index, RtInt nsamps,
@@ -189,6 +223,7 @@ public:
                                         RtVector3 const *Ln,
                                         RixBXLobeWeights &W,
                                         RtFloat *FPdf, RtFloat *RPdf)
+#endif
     {
         for (int i = 0; i < nsamps; i++)
             lobesEvaluated[i].SetNone();
@@ -283,7 +318,7 @@ private:
             D = 0.f;
         else
             D = (alphaSqrd*cosTheta)/(M_PI*((alphaSqrd-1.f)*cosThetaSqrd+1.f)*((alphaSqrd-1.f)*cosThetaSqrd+1.f));
-                // Smiths shadow function
+        // Smiths shadow function
         float IdN = Nn.Dot(inDir);
         float OdN = Nn.Dot(Ln);
         float G1,G2;
